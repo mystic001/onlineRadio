@@ -3,13 +3,16 @@ package com.mystic.onlineradio;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
+
 
 import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.util.Util;
+
+import java.io.OptionalDataException;
+import java.util.List;
+
 
 public class RadioService extends Service {
 
@@ -17,16 +20,23 @@ public class RadioService extends Service {
     private boolean playWhenReady = true;
     private int currentWindow = 0;
     private long playbackPosition = 0;
+    private List<RadioBluePrint> listofRadio;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String url = intent.getStringExtra(RadioFragment.RADIO_URL);
+        listofRadio = RadioCompany.get().getRadioHub();
+        RadioBluePrint radio = (RadioBluePrint) intent.getSerializableExtra(RadioFragment.RADIO);
         player = new SimpleExoPlayer.Builder(this).build();
-        if(url != null){
-            MediaItem mediaItem = MediaItem.fromUri(url);
+        checkRunningState();
+        if( radio != null){
+            MediaItem mediaItem = MediaItem.fromUri(radio.getUrl());
             player.setMediaItem(mediaItem);
-            Log.d("Services",url);
-            initializePlayer();
+            if(!radio.isRunning()){
+                initializePlayer(radio);
+            }else{
+                radio.setRunning(false);
+                releasePlayer();
+            }
         }
 
         return START_STICKY;
@@ -36,13 +46,17 @@ public class RadioService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (Util.SDK_INT >= 24) {
             releasePlayer();
-        }
-
     }
 
-    private void initializePlayer() {
+   /* private void initializePlayer() {
+        player.setPlayWhenReady(playWhenReady);
+        player.seekTo(currentWindow, playbackPosition);
+        player.prepare();
+    }*/
+
+    private void initializePlayer(RadioBluePrint radioBluePrint) {
+        radioBluePrint.setRunning(true);
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
@@ -58,6 +72,25 @@ public class RadioService extends Service {
         }
     }
 
+    private void releasePlayer(RadioBluePrint radioBluePrint) {
+        if (player != null) {
+            radioBluePrint.setRunning(false);
+            playWhenReady = player.getPlayWhenReady();
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+            player.release();
+            //player = null;
+        }
+    }
+
+    public void checkRunningState(){
+        for(int i = 0 ; i < listofRadio.size() ; i++){
+            RadioBluePrint radio = listofRadio.get(i);
+            if(radio.isRunning()){
+                releasePlayer(radio);
+            }
+        }
+    }
 
     @Nullable
     @Override

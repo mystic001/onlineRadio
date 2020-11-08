@@ -1,10 +1,16 @@
 package com.mystic.onlineradio;
 
-public class RadioBluePrint {
+import java.io.Serializable;
+
+public class RadioBluePrint implements Serializable {
 
     private String Url;
+    private String name;
+    private boolean running;
 
-    public RadioBluePrint(String url) {
+    public RadioBluePrint(String url,String name) {
+        this.name = name;
+        running = false;
         Url = url;
     }
 
@@ -14,5 +20,17 @@ public class RadioBluePrint {
 
     public String getUrl(){
         return Url ;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 }

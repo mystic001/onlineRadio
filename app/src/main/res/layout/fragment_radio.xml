@@ -54,7 +54,9 @@
             <TextView
                 android:id="@+id/radname"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="10dp"
+                android:layout_gravity = "center|left"
                 android:text="@string/radio_name" />
 
             <Button
@@ -87,6 +89,8 @@
                 android:id="@+id/secondname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_gravity = "center|left"
                 android:text="@string/radio_name" />
 
             <Button

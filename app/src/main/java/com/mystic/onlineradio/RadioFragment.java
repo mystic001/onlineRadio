@@ -22,7 +22,9 @@ import java.util.List;
  */
 public class RadioFragment extends Fragment {
 
-    public static final String RADIO_URL = "Radio link";
+    public static final String RADIO = "Radio";
+    public static final String STOP = "STOP";
+    public  static  final String PLAY = "PLAY";
     private static final int FIRST_RADIO_POS = 0;
     private static final int SECOND_RADIO_POS = 1;
     private Button firstPlay,secondPlay;
@@ -44,26 +46,30 @@ public class RadioFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        RadioCompany radioCompany =  new RadioCompany();
-        radioStore = radioCompany.getRadioHub();
-
-
+        radioStore = RadioCompany.get().getRadioHub();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
        View view = inflater.inflate(R.layout.fragment_radio, container, false);
         definations(view);
-        firstPlay.setOnClickListener(view1 -> personalStart(FIRST_RADIO_POS));
+        firstName.setText(radioStore.get(0).getName());
+        secondName.setText(radioStore.get(1).getName());
 
-        secondPlay.setOnClickListener(view12 -> personalStart(SECOND_RADIO_POS));
+        firstPlay.setOnClickListener(view1 -> personalStart(FIRST_RADIO_POS,firstPlay));
+        secondPlay.setOnClickListener(view12 -> personalStart(SECOND_RADIO_POS,secondPlay));
         return view;
     }
 
-    private void personalStart(int pos){
+    private void personalStart(int pos, Button pressed){
         Intent intent = new Intent(getActivity(), RadioService.class);
-        RadioBluePrint firstRadio = radioStore.get(pos);
-        intent.putExtra(RadioFragment.RADIO_URL,firstRadio.getUrl());
+        RadioBluePrint realRadio = radioStore.get(pos);
+        if(!realRadio.isRunning()){
+            pressed.setText(STOP);
+        } else{
+            pressed.setText(PLAY);
+        }
+        intent.putExtra(RadioFragment.RADIO,realRadio);
         if(getActivity() != null){
             getActivity().startService(intent);
         }
