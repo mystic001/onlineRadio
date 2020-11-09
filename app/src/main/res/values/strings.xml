@@ -6,4 +6,6 @@
     <string name="loudspeaker">LoudSpeaker</string>
     <string name="radio_name">Radio name</string>
     <string name="play">PLAY</string>
+    <string name="channel_name">RadioService Notification</string>
+    <string name="channel_description">This notification is aimed at informing the using on the current radio station playing in the background</string>
 </resources>

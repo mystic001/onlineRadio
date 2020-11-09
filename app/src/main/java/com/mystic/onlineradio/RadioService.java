@@ -1,42 +1,57 @@
 package com.mystic.onlineradio;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-
-import java.io.OptionalDataException;
 import java.util.List;
 
 
 public class RadioService extends Service {
 
+    private static final String CHANNEL_ID = "ChannelID";
+    private static final int NOTIFICATION_ID = 50;
     private SimpleExoPlayer player;
     private boolean playWhenReady = true;
     private int currentWindow = 0;
     private long playbackPosition = 0;
-    private List<RadioBluePrint> listofRadio;
+    private final Binder binder = new RadioServiceBinder();
+    private boolean state;
+    RadioBluePrint radio;
+
+    public boolean isPlayWhenReady() {
+        return playWhenReady;
+    }
+
+    public int getCurrentWindow() {
+        return currentWindow;
+    }
+
+    public long getPlaybackPosition() {
+        return playbackPosition;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        listofRadio = RadioCompany.get().getRadioHub();
-        RadioBluePrint radio = (RadioBluePrint) intent.getSerializableExtra(RadioFragment.RADIO);
+       // List<RadioBluePrint> listofRadio = RadioCompany.get().getRadioHub();
+        radio = (RadioBluePrint) intent.getSerializableExtra(RadioFragment.RADIO);
         player = new SimpleExoPlayer.Builder(this).build();
-        checkRunningState();
         if( radio != null){
             MediaItem mediaItem = MediaItem.fromUri(radio.getUrl());
             player.setMediaItem(mediaItem);
-            if(!radio.isRunning()){
-                initializePlayer(radio);
-            }else{
-                radio.setRunning(false);
-                releasePlayer();
-            }
+            initializePlayer();
+            showNotif();
         }
 
         return START_STICKY;
@@ -49,18 +64,18 @@ public class RadioService extends Service {
             releasePlayer();
     }
 
-   /* private void initializePlayer() {
-        player.setPlayWhenReady(playWhenReady);
-        player.seekTo(currentWindow, playbackPosition);
-        player.prepare();
-    }*/
-
-    private void initializePlayer(RadioBluePrint radioBluePrint) {
-        radioBluePrint.setRunning(true);
+   private void initializePlayer() {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
     }
+
+   /* private void initializePlayer(RadioBluePrint radioBluePrint) {
+        radioBluePrint.setRunning(true);
+        player.setPlayWhenReady(playWhenReady);
+        player.seekTo(currentWindow, playbackPosition);
+        player.prepare();
+    }*/
 
     private void releasePlayer() {
         if (player != null) {
@@ -72,29 +87,76 @@ public class RadioService extends Service {
         }
     }
 
-    private void releasePlayer(RadioBluePrint radioBluePrint) {
+    /*private void releasePlayer(RadioBluePrint radioBluePrint) {
         if (player != null) {
             radioBluePrint.setRunning(false);
-            playWhenReady = player.getPlayWhenReady();
+            player.setPlayWhenReady(false);
+            //playWhenReady = player.getPlayWhenReady();
+
             playbackPosition = player.getCurrentPosition();
             currentWindow = player.getCurrentWindowIndex();
+            player.stop();
             player.release();
             //player = null;
         }
-    }
+    }*/
 
-    public void checkRunningState(){
+    /*public void checkRunningState(){
         for(int i = 0 ; i < listofRadio.size() ; i++){
             RadioBluePrint radio = listofRadio.get(i);
             if(radio.isRunning()){
-                releasePlayer(radio);
+                releasePlayer();
             }
+        }
+    }*/
+
+    public class RadioServiceBinder extends Binder {
+        public RadioService getRadioService(){
+            return RadioService.this;
         }
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void showNotif(){
+        createNotificationChannel();;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.exo_icon_circular_play)
+                .setContentTitle("Radio is playing")
+                .setContentText(radio.getName())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVibrate(new long[] {0, 1000})
+                .setAutoCancel(true);
+
+
+        Intent actionIntent = new Intent(this, RadioActivity.class);
+        PendingIntent actionPendingIntent = PendingIntent.getActivity(this, 0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(actionPendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+
+
 }
