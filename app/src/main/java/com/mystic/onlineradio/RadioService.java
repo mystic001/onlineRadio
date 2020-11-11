@@ -27,24 +27,14 @@ public class RadioService extends Service {
     private int currentWindow = 0;
     private long playbackPosition = 0;
     private final Binder binder = new RadioServiceBinder();
-    private boolean state;
-    RadioBluePrint radio;
+    private RadioBluePrint radio;
 
-    public boolean isPlayWhenReady() {
-        return playWhenReady;
-    }
-
-    public int getCurrentWindow() {
-        return currentWindow;
-    }
-
-    public long getPlaybackPosition() {
-        return playbackPosition;
+    public SimpleExoPlayer getPlayer() {
+        return player;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-       // List<RadioBluePrint> listofRadio = RadioCompany.get().getRadioHub();
         radio = (RadioBluePrint) intent.getSerializableExtra(RadioFragment.RADIO);
         player = new SimpleExoPlayer.Builder(this).build();
         if( radio != null){
@@ -70,13 +60,6 @@ public class RadioService extends Service {
         player.prepare();
     }
 
-   /* private void initializePlayer(RadioBluePrint radioBluePrint) {
-        radioBluePrint.setRunning(true);
-        player.setPlayWhenReady(playWhenReady);
-        player.seekTo(currentWindow, playbackPosition);
-        player.prepare();
-    }*/
-
     private void releasePlayer() {
         if (player != null) {
             playWhenReady = player.getPlayWhenReady();
@@ -86,29 +69,6 @@ public class RadioService extends Service {
             player = null;
         }
     }
-
-    /*private void releasePlayer(RadioBluePrint radioBluePrint) {
-        if (player != null) {
-            radioBluePrint.setRunning(false);
-            player.setPlayWhenReady(false);
-            //playWhenReady = player.getPlayWhenReady();
-
-            playbackPosition = player.getCurrentPosition();
-            currentWindow = player.getCurrentWindowIndex();
-            player.stop();
-            player.release();
-            //player = null;
-        }
-    }*/
-
-    /*public void checkRunningState(){
-        for(int i = 0 ; i < listofRadio.size() ; i++){
-            RadioBluePrint radio = listofRadio.get(i);
-            if(radio.isRunning()){
-                releasePlayer();
-            }
-        }
-    }*/
 
     public class RadioServiceBinder extends Binder {
         public RadioService getRadioService(){

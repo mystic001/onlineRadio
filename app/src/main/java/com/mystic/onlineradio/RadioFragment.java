@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.IBinder;
 import android.view.LayoutInflater;
@@ -36,10 +37,8 @@ public class RadioFragment extends Fragment {
     private static final int FIRST_RADIO_POS = 0;
     private static final int SECOND_RADIO_POS = 1;
     private Button firstPlay,secondPlay;
-    private PlayerView audioviewone, audioviewtwo;
     private TextView firstName , secondName;
-    private RadioService radioService;
-    private boolean bound = false;
+
 
     private List<RadioBluePrint> radioStore;
 
@@ -55,41 +54,6 @@ public class RadioFragment extends Fragment {
         return  new RadioFragment();
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
-            RadioService.RadioServiceBinder radioServiceBinder = (RadioService.RadioServiceBinder) iBinder;
-            radioService = radioServiceBinder.getRadioService();
-            bound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-    };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Intent intent = new Intent(getActivity(), RadioService.class);
-        if(getActivity() != null){
-            getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        }
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if(bound && getActivity() != null){
-            getActivity().unbindService(connection);
-            bound = false;
-        }
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,13 +67,44 @@ public class RadioFragment extends Fragment {
         firstName.setText(radioStore.get(0).getName());
         secondName.setText(radioStore.get(1).getName());
 
-        firstPlay.setOnClickListener(view1 ->
-                personalStart(FIRST_RADIO_POS,firstPlay));
-        secondPlay.setOnClickListener(view12 -> personalStart(SECOND_RADIO_POS,secondPlay));
+        firstPlay.setOnClickListener(view12 -> {
+            if (!isNetwortConnectedAvailable()) {
+                Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            DetailFragment fragment = DetailFragment.newInstance(radioStore.get(FIRST_RADIO_POS));
+            if(getActivity() != null){
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                fm.beginTransaction()
+                        .replace(R.id.fragment_container,fragment)
+                        .commit();
+
+            }
+
+        });
+
+        secondPlay.setOnClickListener(view1 -> {
+            if (!isNetwortConnectedAvailable()) {
+                Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            DetailFragment fragment = DetailFragment.newInstance(radioStore.get(SECOND_RADIO_POS));
+            if(getActivity() != null){
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                fm.beginTransaction()
+                        .replace(R.id.fragment_container,fragment)
+                        .commit();
+
+            }
+
+        });
+
+        //firstPlay.setOnClickListener(view1 -> personalStart(FIRST_RADIO_POS,firstPlay));
+        //secondPlay.setOnClickListener(view12 -> personalStart(SECOND_RADIO_POS,secondPlay));
         return view;
     }
 
-    private void personalStart(int pos, Button pressed){
+   /* private void personalStart(int pos, Button pressed){
         if (!isNetwortConnectedAvailable()) {
             Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
             return;
@@ -129,18 +124,7 @@ public class RadioFragment extends Fragment {
             }
         }
 
-    }
-
-
-    public void checkRunningState(Intent intent){
-        for(int i = 0 ; i < radioStore.size() ; i++){
-            RadioBluePrint radio = radioStore.get(i);
-            if(radio.isRunning() && getActivity() != null){
-                radio.setRunning(false);
-                getActivity().stopService(intent);
-            }
-        }
-    }
+    }*/
 
 
 
@@ -161,7 +145,5 @@ public class RadioFragment extends Fragment {
         secondPlay = view.findViewById(R.id.buttontwo);
         firstName = view.findViewById(R.id.radname);
         secondName = view.findViewById(R.id.secondname);
-        //audioviewone = view.findViewById(R.id.audio_view);
-       // audioviewtwo = view.findViewById(R.id.audio_view_two);
     }
 }
