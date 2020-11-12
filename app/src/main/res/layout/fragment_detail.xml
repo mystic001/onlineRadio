@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".DetailFragment">
 
     <LinearLayout
@@ -12,12 +13,14 @@
         android:layout_gravity="center"
         tools:ignore="UselessParent">
 
-        <com.google.android.exoplayer2.ui.PlayerView
+        <com.google.android.exoplayer2.ui.StyledPlayerControlView
             android:id="@+id/audio_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:show_timeout="0"
+            app:hide_on_touch="false"/>
 
-        </com.google.android.exoplayer2.ui.PlayerView>
+
 
         <TextView
             android:id="@+id/radionamedetail"

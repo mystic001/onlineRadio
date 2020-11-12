@@ -65,6 +65,7 @@ public class RadioService extends Service {
             playWhenReady = player.getPlayWhenReady();
             playbackPosition = player.getCurrentPosition();
             currentWindow = player.getCurrentWindowIndex();
+            player.stop();
             player.release();
             player = null;
         }

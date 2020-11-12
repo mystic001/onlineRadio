@@ -72,14 +72,21 @@ public class RadioFragment extends Fragment {
                 Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
                 return;
             }
-            DetailFragment fragment = DetailFragment.newInstance(radioStore.get(FIRST_RADIO_POS));
-            if(getActivity() != null){
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                fm.beginTransaction()
-                        .replace(R.id.fragment_container,fragment)
-                        .commit();
 
+            if(!radioStore.get(FIRST_RADIO_POS).isRunning()){
+                DetailFragment fragment = DetailFragment.newInstance(radioStore.get(FIRST_RADIO_POS));
+                firstPlay.setText(STOP);
+                if(getActivity() != null){
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    fm.beginTransaction()
+                            .replace(R.id.fragment_container,fragment)
+                            .commit();
+
+                }
+            }else{
+                
             }
+
 
         });
 

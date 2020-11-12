@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.ui.StyledPlayerControlView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,7 +29,7 @@ public class DetailFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "Radio model";
-    private PlayerView audio;
+    private StyledPlayerControlView audio;
     private RadioService radioService;
     private boolean bound = false;
 
