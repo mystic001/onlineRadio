@@ -43,7 +43,6 @@ public class DetailFragment extends Fragment {
     private int currentWindow = 0;
     private long playbackPosition = 0;
     private RadioBluePrint radioBluePrint;
-    private  Player.EventListener listener;
     private ProgressBar bar;
 
     // TODO: Rename and change types of parameters
@@ -57,7 +56,14 @@ public class DetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        initializePlayer(radioBluePrint);
+        if(!radioBluePrint.isRunning()){
+            initializePlayer(radioBluePrint);
+            radioBluePrint.setRunning(true);
+        }else{
+            radioBluePrint.setRunning(false);
+            return;
+        }
+
     }
 
 
@@ -110,7 +116,7 @@ public class DetailFragment extends Fragment {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
-        listener = new Player.EventListener() {
+        player.addListener(new Player.EventListener() {
             @Override
             public void onPlaybackStateChanged(int state) {
                 if( state == Player.STATE_BUFFERING ){
@@ -120,8 +126,10 @@ public class DetailFragment extends Fragment {
                     bar.setVisibility(View.GONE);
                 }
             }
-        };
-    }
+        });
+    };
+
+
 
     private void releasePlayer() {
         if (player != null) {
