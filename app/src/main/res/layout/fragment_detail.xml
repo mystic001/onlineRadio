@@ -13,12 +13,11 @@
         android:layout_gravity="center"
         tools:ignore="UselessParent">
 
-        <com.google.android.exoplayer2.ui.StyledPlayerControlView
+        <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/audio_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:show_timeout="0"
-            app:hide_on_touch="false"/>
+            app:controller_layout_id="@layout/custom_playback_control"/>
 
 
 

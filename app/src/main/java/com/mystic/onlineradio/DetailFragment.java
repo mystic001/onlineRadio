@@ -1,11 +1,16 @@
 package com.mystic.onlineradio;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.IBinder;
@@ -14,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -28,29 +34,19 @@ public class DetailFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
     private static final String ARG_PARAM1 = "Radio model";
-    private StyledPlayerControlView audio;
-    private RadioService radioService;
-    private boolean bound = false;
-
-
-    // TODO: Rename and change types of parameters
+    private SimpleExoPlayer player;
+    private PlayerView playerView;
+    private boolean playWhenReady = true;
+    private int currentWindow = 0;
+    private long playbackPosition = 0;
     private RadioBluePrint radioBluePrint;
 
+    // TODO: Rename and change types of parameters
 
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            RadioService.RadioServiceBinder radioServiceBinder = (RadioService.RadioServiceBinder) iBinder;
-            radioService = radioServiceBinder.getRadioService();
-            bound = true;
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-    };
+
     public DetailFragment() {
         // Required empty public constructor
     }
@@ -58,22 +54,23 @@ public class DetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(getActivity() != null ){
-            Intent intent = new Intent(getActivity(), RadioService.class);
-            getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-            intent.putExtra(RadioFragment.RADIO,radioBluePrint);
-            getActivity().startService(intent);
-        }
-
+        //initializePlayer(radioBluePrint);
     }
+
 
     @Override
     public void onStop() {
         super.onStop();
-        if(bound){
-            bound = false;
-        }
+       // releasePlayer();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+    }
+
+
 
     public static DetailFragment newInstance(RadioBluePrint radioBluePrint) {
         DetailFragment fragment = new DetailFragment();
@@ -88,6 +85,8 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             radioBluePrint = (RadioBluePrint) getArguments().getSerializable(ARG_PARAM1);
+            assert radioBluePrint != null;
+            initializePlayer(radioBluePrint);
         }
     }
 
@@ -96,16 +95,30 @@ public class DetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
         TextView textView = view.findViewById(R.id.radionamedetail);
         textView.setText(radioBluePrint.getName());
-        audio = view.findViewById(R.id.audio_view);
-        connectionPoint();
+        playerView = view.findViewById(R.id.audio_view);
         return view;
     }
 
-
-    private void connectionPoint(){
-        if(bound && radioService != null ){
-            SimpleExoPlayer player = radioService.getPlayer();
-            audio.setPlayer(player);
-        }
+    private void initializePlayer(RadioBluePrint radioBluePrint) {
+        assert getActivity() != null;
+        player = new SimpleExoPlayer.Builder(getActivity()).build();
+        MediaItem mediaItem = MediaItem.fromUri(radioBluePrint.getUrl());
+        player.setMediaItem(mediaItem);
+        playerView.setPlayer(player);
+        player.setPlayWhenReady(playWhenReady);
+        player.seekTo(currentWindow, playbackPosition);
+        player.prepare();
     }
+
+    private void releasePlayer() {
+        if (player != null) {
+            playWhenReady = player.getPlayWhenReady();
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+            player.release();
+            player = null;
+        }
+
+    }
+
 }

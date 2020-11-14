@@ -7,7 +7,9 @@ public class RadioActivity extends SingleFragmentActivity {
 
     @Override
     protected Fragment createFragment() {
+
        return RadioFragment.newInstance();
+
     }
 
 }

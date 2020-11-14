@@ -1,12 +1,17 @@
 package com.mystic.onlineradio;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -23,6 +28,7 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import java.util.List;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,12 +38,12 @@ import static android.content.Context.CONNECTIVITY_SERVICE;
 public class RadioFragment extends Fragment {
 
     public static final String RADIO = "Radio";
-    public static final String STOP = "STOP";
-    public  static  final String PLAY = "PLAY";
     private static final int FIRST_RADIO_POS = 0;
     private static final int SECOND_RADIO_POS = 1;
     private Button firstPlay,secondPlay;
     private TextView firstName , secondName;
+    private static final String CHANNEL_ID = "ChannelID";
+    private static final int NOTIFICATION_ID = 50;
 
 
     private List<RadioBluePrint> radioStore;
@@ -72,21 +78,15 @@ public class RadioFragment extends Fragment {
                 Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            if(!radioStore.get(FIRST_RADIO_POS).isRunning()){
                 DetailFragment fragment = DetailFragment.newInstance(radioStore.get(FIRST_RADIO_POS));
-                firstPlay.setText(STOP);
                 if(getActivity() != null){
                     FragmentManager fm = getActivity().getSupportFragmentManager();
                     fm.beginTransaction()
                             .replace(R.id.fragment_container,fragment)
                             .commit();
+                    showNotif(radioStore.get(FIRST_RADIO_POS));
 
                 }
-            }else{
-                
-            }
-
 
         });
 
@@ -101,7 +101,7 @@ public class RadioFragment extends Fragment {
                 fm.beginTransaction()
                         .replace(R.id.fragment_container,fragment)
                         .commit();
-
+                showNotif(radioStore.get(SECOND_RADIO_POS));
             }
 
         });
@@ -111,28 +111,45 @@ public class RadioFragment extends Fragment {
         return view;
     }
 
-   /* private void personalStart(int pos, Button pressed){
-        if (!isNetwortConnectedAvailable()) {
-            Toast.makeText(getActivity(),"Not connected",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Intent intent = new Intent(getActivity(), RadioService.class);
-        RadioBluePrint realRadio = radioStore.get(pos);
-        intent.putExtra(RadioFragment.RADIO,realRadio);
-        if(!realRadio.isRunning() && getActivity() != null ){
-            pressed.setText(STOP);
-            realRadio.setRunning(true);
-            getActivity().startService(intent);
-        } else{
-            pressed.setText(PLAY);
-            realRadio.setRunning(false);
-            if(getActivity() != null){
-                getActivity().stopService(intent);
-            }
-        }
 
-    }*/
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            assert getActivity()  != null;
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
+
+    private void showNotif(RadioBluePrint radio){
+        createNotificationChannel();;
+        assert getActivity() != null;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.exo_icon_circular_play)
+                .setContentTitle("Radio is playing")
+                .setContentText(radio.getName())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVibrate(new long[] {0, 1000})
+                .setAutoCancel(true);
+
+
+        Intent actionIntent = new Intent(getActivity(), RadioActivity.class);
+        PendingIntent actionPendingIntent = PendingIntent.getActivity(getActivity(), 0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setContentIntent(actionPendingIntent);
+        assert getActivity() != null;
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
 
 
     private boolean isNetwortConnectedAvailable(){
