@@ -28,7 +28,14 @@
             android:layout_gravity="center"
             android:text="@string/exo_controls_play_description"
             android:textSize="20sp" />
+
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+
+        android:layout_centerInParent="true" />
 
 </FrameLayout>

@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.MediaItem;
@@ -42,6 +43,8 @@ public class DetailFragment extends Fragment {
     private int currentWindow = 0;
     private long playbackPosition = 0;
     private RadioBluePrint radioBluePrint;
+    private  Player.EventListener listener;
+    private ProgressBar bar;
 
     // TODO: Rename and change types of parameters
 
@@ -54,7 +57,7 @@ public class DetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        //initializePlayer(radioBluePrint);
+        initializePlayer(radioBluePrint);
     }
 
 
@@ -85,8 +88,6 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             radioBluePrint = (RadioBluePrint) getArguments().getSerializable(ARG_PARAM1);
-            assert radioBluePrint != null;
-            initializePlayer(radioBluePrint);
         }
     }
 
@@ -95,6 +96,7 @@ public class DetailFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
         TextView textView = view.findViewById(R.id.radionamedetail);
         textView.setText(radioBluePrint.getName());
+        bar = view.findViewById(R.id.progress_bar);
         playerView = view.findViewById(R.id.audio_view);
         return view;
     }
@@ -108,6 +110,17 @@ public class DetailFragment extends Fragment {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
+        listener = new Player.EventListener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if( state == Player.STATE_BUFFERING ){
+                    bar.setVisibility(View.VISIBLE);
+                }
+                if(state == Player.STATE_READY){
+                    bar.setVisibility(View.GONE);
+                }
+            }
+        };
     }
 
     private void releasePlayer() {
