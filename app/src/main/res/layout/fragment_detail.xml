@@ -13,23 +13,24 @@
         android:layout_gravity="center"
         tools:ignore="UselessParent">
 
-        <com.google.android.exoplayer2.ui.StyledPlayerControlView
+        <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/audio_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:show_timeout="0"
-            app:hide_on_touch="false"/>
+            android:layout_height="match_parent"
+            app:controller_layout_id="@layout/custom_playback_control"
+            app:fastforward_increment="10000"
+            app:hide_on_touch="false"
+            app:rewind_increment="10000"
+            app:show_buffering="when_playing"
+            app:use_controller="true" />
 
-
-
-        <TextView
-            android:id="@+id/radionamedetail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/exo_controls_play_description"
-            android:textSize="20sp" />
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
 </FrameLayout>

@@ -73,7 +73,7 @@ public class RadioFragment extends Fragment {
                 return;
             }
 
-            if(!radioStore.get(FIRST_RADIO_POS).isRunning()){
+
                 DetailFragment fragment = DetailFragment.newInstance(radioStore.get(FIRST_RADIO_POS));
                 firstPlay.setText(STOP);
                 if(getActivity() != null){
@@ -82,9 +82,7 @@ public class RadioFragment extends Fragment {
                             .replace(R.id.fragment_container,fragment)
                             .commit();
 
-                }
-            }else{
-                
+
             }
 
 

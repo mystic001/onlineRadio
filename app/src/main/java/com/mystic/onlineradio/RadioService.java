@@ -8,14 +8,17 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.view.View;
+import android.widget.ProgressBar;
 
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import java.util.List;
+
 
 
 public class RadioService extends Service {
@@ -28,6 +31,8 @@ public class RadioService extends Service {
     private long playbackPosition = 0;
     private final Binder binder = new RadioServiceBinder();
     private RadioBluePrint radio;
+    private int bar_det_show = 0;
+    private int bar_det_off = 0;
 
     public SimpleExoPlayer getPlayer() {
         return player;
@@ -47,6 +52,9 @@ public class RadioService extends Service {
         return START_STICKY;
     }
 
+    public int getBardet() {
+        return bar_det_show;
+    }
 
     @Override
     public void onDestroy() {
@@ -58,6 +66,23 @@ public class RadioService extends Service {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
+        player.addListener(new Player.EventListener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if(state == Player.STATE_BUFFERING){
+                   bar_det_show = state;
+                }
+
+                if(state == Player.STATE_READY){
+                    bar_det_off = state;
+                }
+            }
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+
+            }
+        });
     }
 
     private void releasePlayer() {
@@ -69,6 +94,10 @@ public class RadioService extends Service {
             player.release();
             player = null;
         }
+    }
+
+    public int getBardetOff() {
+        return bar_det_off;
     }
 
     public class RadioServiceBinder extends Binder {
