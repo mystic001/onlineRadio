@@ -25,7 +25,7 @@ public class RadioService extends Service {
 
     private static final String CHANNEL_ID = "ChannelID";
     private static final int NOTIFICATION_ID = 50;
-    private SimpleExoPlayer player;
+    private SimpleExoPlayer player ;
     private boolean playWhenReady = true;
     private int currentWindow = 0;
     private long playbackPosition = 0;
@@ -34,9 +34,6 @@ public class RadioService extends Service {
     private int bar_det_show = 0;
     private int bar_det_off = 0;
 
-    public SimpleExoPlayer getPlayer() {
-        return player;
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -51,6 +48,11 @@ public class RadioService extends Service {
 
         return START_STICKY;
     }
+
+    public SimpleExoPlayer getPlayer() {
+        return player;
+    }
+
 
     public int getBardet() {
         return bar_det_show;

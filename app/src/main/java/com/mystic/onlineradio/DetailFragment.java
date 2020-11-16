@@ -35,9 +35,8 @@ public class DetailFragment extends Fragment {
     private PlayerView audio;
     private RadioService radioService;
     private ProgressBar bar;
-    private int show;
-    private int off;
     private boolean bound = false;
+    private SimpleExoPlayer player;
 
 
     // TODO: Rename and change types of parameters
@@ -50,8 +49,10 @@ public class DetailFragment extends Fragment {
             RadioService.RadioServiceBinder radioServiceBinder = (RadioService.RadioServiceBinder) iBinder;
             radioService = radioServiceBinder.getRadioService();
             bound = true;
+            player = radioService.getPlayer();
+            connectionPoint();
+            progressBarDet();
             Toast.makeText(getActivity(),"Am seeing tins"+bound,Toast.LENGTH_LONG).show();
-            Log.d("Detailfrag",""+bound);
         }
 
         @Override
@@ -102,27 +103,24 @@ public class DetailFragment extends Fragment {
         if (getArguments() != null) {
             radioBluePrint = (RadioBluePrint) getArguments().getSerializable(ARG_PARAM1);
         }
-        Toast.makeText(getActivity(),"Oncreate na me"+bound,Toast.LENGTH_LONG).show();
-        Log.d("Detailfrag","Nust work");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
         audio = view.findViewById(R.id.audio_view);
+//The error is happening on this line we are trying communicate between the service and the fragment but at the time we called on the oncreateview method
+        //the player was sttill null so we could not get the player we needed
+        audio.setPlayer(player);
         bar = view.findViewById(R.id.progress_bar);
-        connectionPoint();
-        progressBarDet();
         return view;
     }
 
 
     private void connectionPoint(){
         if(bound && radioService != null ){
-            Toast.makeText(getActivity(),"connectionpoint"+bound,Toast.LENGTH_LONG).show();
             SimpleExoPlayer player = radioService.getPlayer();
-            audio.setPlayer(player);
-            Log.d("Detailfrag","I am connecting");
+            audio.setPlayer(new SimpleExoPlayer.Builder(getActivity()).build());
         }
     }
 
@@ -130,9 +128,8 @@ public class DetailFragment extends Fragment {
     //This method determines if the progress bar shows or not
     private void progressBarDet() {
         if (bound) {
-
-        off = radioService.getBardetOff();
-        show = radioService.getBardet();
+            int off = radioService.getBardetOff();
+            int show = radioService.getBardet();
             if (off == 2) {
                 bar.setVisibility(View.VISIBLE);
             }
