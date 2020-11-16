@@ -7,7 +7,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -68,6 +70,13 @@ public class RadioService extends Service {
         player.setPlayWhenReady(playWhenReady);
         player.seekTo(currentWindow, playbackPosition);
         player.prepare();
+        Intent broadCastIntent = new Intent(DetailFragment.PLAYING);
+        // Bundle bundle = new Bundle();
+        //bundle.putParcelable("Player", (Parcelable) player);
+        // broadCastIntent.putExtra("Player",bundle);
+
+        broadCastIntent.putExtra("Test","Showing up");
+        sendBroadcast(broadCastIntent);
         player.addListener(new Player.EventListener() {
             @Override
             public void onPlaybackStateChanged(int state) {
