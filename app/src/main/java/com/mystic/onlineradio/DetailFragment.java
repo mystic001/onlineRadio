@@ -100,8 +100,6 @@ public class DetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
-        TextView textView = view.findViewById(R.id.radionamedetail);
-        textView.setText(radioBluePrint.getName());
         bar = view.findViewById(R.id.progress_bar);
         playerView = view.findViewById(R.id.audio_view);
         return view;
