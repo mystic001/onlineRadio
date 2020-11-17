@@ -59,9 +59,6 @@ public class DetailFragment extends Fragment {
         if(!radioBluePrint.isRunning()){
             initializePlayer(radioBluePrint);
             radioBluePrint.setRunning(true);
-        }else{
-            radioBluePrint.setRunning(false);
-            return;
         }
 
     }
@@ -123,8 +120,20 @@ public class DetailFragment extends Fragment {
                 if(state == Player.STATE_READY){
                     bar.setVisibility(View.GONE);
                 }
+            };
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                if(!isPlaying){
+                    radioBluePrint.setRunning(false);
+                } else{
+                    radioBluePrint.setRunning(true);
+                }
+
             }
-        });
+        }
+
+        );
     };
 
 
